@@ -1,0 +1,13 @@
+\chapter{Conclusion}
+
+The ambiguity of an automaton is an important characteristic because if an NFA is \emph{unambiguous} many decision problems that are only solvable in exponential time become solvable in polynomial time (e.g equivalence of two automata \cite{StearnsH85}).
+
+There are well-defined algorithms to classify the ambiguity class of an automaton that was implemented and used in this work. Besides the algorithms presented, there is also one to determine the smallest degree of the polynomial that bounds the ambiguity degree of a PNFA automaton \cite{Seidl89}.
+
+However, there is no algorithm to determine the degree of an FNFA automaton except for finding the degree by some kind of brute force exploration of all words. It is also PSPACE-complete to decide if an FNFA automaton has degree $k, k>0$ \cite{ChanI83}.
+
+Furthermore, the degree of ambiguity of an FNFA can be exponential in the size of the automaton \cite{Seidl89}. An example of a family of FNFA where the degree grows exponentially with the size of the automaton was shown in Figure \ref{fig:FNFAexpo}.
+
+Finally, analyzing the results, we can see that most of the automata classified are \emph{exponentially ambiguous}. Which means that the most common class of ambiguity for automata (if it is the result from the conversion of a regular expression) is ENFA, and, since the ENFA is the one where the number of paths growths faster (exponentially), this leads to a more inefficient analysis of automata.
+
+In order to get a more clear understanding of the ambiguity of automata, it is necessary more work to find an algorithm to compute the degree of ambiguity of an FNFA. An interesting line of work would be also to try to decrease and remove the ambiguity of an automaton.

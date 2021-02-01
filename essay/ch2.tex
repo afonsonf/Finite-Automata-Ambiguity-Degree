@@ -1,0 +1,262 @@
+\chapter{Ambiguity}
+% There has been much study in understanding characteristics of NFA's.
+In this chapter we will study a metric of ambiguity of an NFA and the underlying algorithms to classify it.
+
+\section{Degree of Ambiguity}
+
+An NFA $M$ is \emph{ambiguous} if there are at least two distinct paths of $M$ that accept a word $w \in \Sigma^*$. Furthermore, the number of paths that accepts $w$ in the automaton M is defined as the degree of the word $w$ in the automaton $M$, $da_M(w)$.
+
+The degree of ambiguity on an NFA $M$ is defined as $sup\{da_M(w) | w \in \Sigma^*\}$. This degree can be either finite or infinite. The degree is finite if there is a positive integer $k$ such that, for all words $w$, the $da_M(w) \leq k$ otherwise is infinite.
+
+There are $4$ classes of ambiguity to classify an NFA \cite{Seidl89}: \emph{unambiguous} (UFA), \emph{finitely ambiguous} (FNFA), \emph{polynomially ambiguous} (PNFA) and \emph{exponentially ambiguous} (ENFA).
+
+\begin{figure}[ht]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \begin{tikzpicture}[>=stealth', shorten >=1pt, auto,
+    node distance=2cm,initial text={}]
+    \node [state, initial, accepting]                         (A) {$0$};
+    \path[->] (A) edge [loop above]             node {$a$} ();
+  \end{tikzpicture}
+  \caption{UFA}
+  \label{fig:ufa}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \begin{tikzpicture}[>=stealth', shorten >=1pt, auto,
+    node distance=2cm,initial text={}]
+    \node [state, initial]                           (A) {$0$};
+    \node [state, accepting] [right of=A]            (B) {$1$};
+    \node [state, accepting] [below of=B]            (C) {$2$};
+    \path[->] (A) edge                          node {$a$} (B)
+                  edge                          node {$a$} (C)
+              (B) edge [loop right]             node {$a$} ()
+              (C) edge [loop right]             node {$a$} ();
+  \end{tikzpicture}
+  \caption{FNFA}
+  \label{fig:fnfa}
+\end{subfigure}
+\newline
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \begin{tikzpicture}[>=stealth', shorten >=1pt, auto,
+    node distance=2cm,initial text={}]
+    \node [state, initial]                           (A) {$0$};
+    \node [state, accepting] [right of=A]            (B) {$1$};
+    \path[->] (A) edge                          node {$a$} (B)
+                  edge [loop above]             node {$a$} ()
+              (B) edge [loop above]             node {$a$} ();
+  \end{tikzpicture}
+  \caption{PNFA}
+  \label{fig:pnfa}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \begin{tikzpicture}[>=stealth', shorten >=1pt, auto,
+    node distance=2cm,initial text={}]
+    \node [state, initial, accepting]                (A) {$0$};
+    \node [state] [right of=A]                       (B) {$1$};
+    \node [state] [below of=B]                       (C) {$2$};
+    \path[->] (A) edge [bend left]              node {$a$} (B)
+                  edge                          node {$a$} (C)
+              (B) edge                          node {$a$} (A)
+              (C) edge [bend left]             node {$a$} (A);
+  \end{tikzpicture}
+  \caption{ENFA}
+  \label{fig:enfa}
+\end{subfigure}
+\caption{Classes of Ambiguity}
+\label{fig:automaton}
+\end{figure}
+
+\begin{definition}
+An NFA is \emph{unambiguous} if, for each word $w$, there is at most one accepting path.
+\end{definition}
+
+Figure \ref{fig:ufa} shows an example of an NFA diagram that is \emph{unambiguous}. All accepted words have only one accepting path. Note that a DFA is always \emph{unambiguous} (but not all \emph{unambiguous} automata are DFA).
+
+\begin{definition}
+An NFA is \emph{finitely ambiguous} if there is a $k \in Z$ such that, for each word $w$, the number of paths that accepts $w$ is at most $k$.
+\end{definition}
+
+Figure \ref{fig:fnfa} shows an example of an NFA diagram that is \emph{finitely ambiguous}, where the accepted language is the language of the regular expression $aa^*$. The degree of ambiguity of the NFA is two.
+
+\begin{figure}[ht]
+\centering
+\begin{tabular}{ccc}
+\begin{tikzpicture}[>=stealth', shorten >=1pt, auto,
+  node distance=2cm,initial text={},text width=8mm,align=center]
+  % \node [state, initial]                 (A) {$0$};
+  % \node [state, initial]   [below of=A]  (B) {$1$};
+  \node [state,initial]               (C) {$1$};
+  \node [state,initial] [below of=C]  (D) {$2$};
+
+  % \path[->] (A) edge                     node {$a$} (C)
+  %               edge                     node {$a$} (D)
+  %           (B) edge                     node {$a$} (C)
+  %               edge                     node {$a$} (D);
+
+  \node [state,dashed]   [right of=C]  (E) {$...$};
+  \node [state,dashed]   [below of=E]  (F) {$...$};
+
+  \node [state] [right of=E]                 (G) {\scriptsize $2n-3$};
+  \node [state] [below of=G]                 (H) {\scriptsize $2n-2$};
+  \node [state, accepting] [right of=G]      (I) {\scriptsize $2n-1$};
+  \node [state, accepting] [right of=H]      (J) {\scriptsize $2n$};
+
+  \path[->] (G) edge                         node {$a$} (I)
+                edge                         node {$a$} (J)
+            (H) edge                         node {$a$} (I)
+                edge                         node {$a$} (J);
+
+  \path[dashed,->] (C) edge     node {$a$} (E)
+                       edge     node {$a$} (F)
+                   (D) edge     node {$a$} (E)
+                       edge     node {$a$} (F)
+                   (E) edge     node {$a$} (G)
+                       edge     node {$a$} (H)
+                   (F) edge     node {$a$} (G)
+                       edge     node {$a$} (H);
+\end{tikzpicture} \\
+\end{tabular}
+\caption{Family of FNFA where the degree of ambiguity grows exponentially with the size of the automata}
+\label{fig:FNFAexpo}
+\end{figure}
+
+\begin{lemma} \textbf{\cite{Seidl89}}
+The degree of an FNFA of size $m$ is at most of the order $2^{O(m\times \log_2 m)}$.
+\end{lemma}
+
+In Figure \ref{fig:FNFAexpo} we can see an example of a family of FNFA diagram where the degree grows exponentially with the size of the automata.
+
+An automaton of that family with $2n$ nodes, where $n>1$, will have (finite) degree of ambiguity of $2^{n/2}$ and will accept the language $a^{n-1}$.
+
+\begin{definition}
+An NFA is \emph{polynomially ambiguous} if there is a polynomial $p$ such that, for each word $w$, the number of paths that accepts $w$ is at most $p(|w|)$.
+\end{definition}
+
+Figure \ref{fig:pnfa} shows an example of a PNFA diagram  where the word $a^i, i \geq 1$, has $i$ accepting paths. An example of a polynomial that bounds the degree of ambiguity of the NFA mentioned is the identity polynomial $p(k) = k$.
+
+\begin{definition}
+An NFA is \emph{exponentially ambiguous} if, for each word $w$, the number of paths that accept $w$ is bounded by some exponential function on the size of $w$.
+\end{definition}
+
+An example of an ENFA diagram is shown in Figure \ref{fig:enfa} where the degree of the word $a^{2(i+1)}$ has $2^i$ accepting paths.
+
+\section{Criteria for Ambiguity Classification}
+To classify an automaton there are three criteria that can be checked. A criterion to check if an automaton is ambiguous, the Infinite Degree of Ambiguity (IDA) criterion to check if the degree is finite and the Exponential Degree of Ambiguity (EDA) criterion to check if an automaton has exponential ambiguity. There is an algorithm to check each criterion and they can be computed in polynomial time, therefore the classification of the ambiguity of an NFA can be decided in polynomial time.
+
+In this section we present the criteria above and the newly written code to test the criteria of NFA's. The newly written auxiliary functions used in the code can be consulted in the appendix, except for the functions \emph{trim}, \emph{dup} and \emph{addTransition} that can be found in the documentation of FAdo \cite{BRODA201994}.
+
+\subsection{Criterion for Exponential Degree of Ambiguity - EDA}
+An NFA is ENFA if and only if it complies with the following EDA criterion \cite{Seidl89}.
+
+EDA: there exists a state $q$ with at least two distinct cycles labeled by some $v \in \Sigma^*$.
+
+The algorithm presented in Algorithm \ref{algorithm:eda} is based on the following lemma.
+
+\begin{lemma} \textbf{\cite{AllauzenMR11}}
+An NFA $M$ satisfies EDA if and only if there exists a strongly connected component of $M^2 = M \cap M$, obtained from the product, that contains two states of the form $(p,p)$ and $(q,q')$ with $p,q,q'$ states of $M$ and $q \neq q'$.
+\end{lemma}
+
+For an NFA $M$, the algorithm presented in Algorithm \ref{algorithm:eda}, is as follows. First, in lines 2-7, $M$ is trimmed and $M^2$ is computed.
+Then we get the connected components of $M^2$ (line 9), and, for each one, we check if there are two states $(s_1,s_2),(s_1',s_2') \in M^2$ such that $s_1 = s_2 \land s_1' \neq s_2'$ (line 16).
+
+%s1 < s2
+\begin{lstlisting}[language=Python, caption = Algorithm to test EDA criterion, label={algorithm:eda}]
+def testEDA(nfax):
+    nfa = nfax.dup()
+    nfa.trim()
+
+    conj = myProduct(nfa,nfa)
+    addFinals(conj, nfa, nfa)
+    conj.trim()
+
+    comp = stronglyConnectedComponents(conj)
+    for l in comp:
+        for s1 in l:
+            for s2 in l:
+                if s1==s2: continue
+                (p1,p2) = literal_eval(conj.States[s1])
+                (q1,q2) = literal_eval(conj.States[s2])
+                if p1==p2 and q1!=q2:
+                    return True
+    return False
+\end{lstlisting}
+
+\subsection{Criterion for Infinite Degree of Ambiguity - IDA}
+An NFA M is PNFA if and only if it complies with the following IDA criterion \cite{Seidl89} and not satisfies the EDA criterion.
+
+IDA: There are distinct useful states $p,q \in Q$ such that for some word $v \in \Sigma^*$ $(p,v,p),(p,v,q),(q,v,q) \in \delta$.
+
+The algorithm presented in Algorithm \ref{algorithm:ida} is based on the following lemma.
+
+\begin{lemma} \textbf{\cite{AllauzenMR11}}
+An NFA $M$ satisfies IDA if and only if there exist two different states $p$ and $q$ in $M$ with a path in $M^3=M \cap M \cap M$, obtained from the product, from state $(p,p,q)$ to state $(p,q,q)$.
+\end{lemma}
+
+For an NFA $M$, the algorithm presented in Algorithm \ref{algorithm:ida}, is as follows. First, in lines 2-11, $M$ is trimmed and $M^3$ is computed. Then, in lines 13-19, we add the transitions $((p,p,q),\#,(p,q,q))$ for all states $p,q$ of $M$ ($\#$ is a symbol that is not in the alphabet of $M$). %using function x and y
+Finally, we get the connected components of $M^3$ (line 21), and, for each one, check if there is a transition by the new symbol $\#$ and by another in the original alphabet (lines 30-31).
+
+\begin{lstlisting}[language=Python, caption = Algorithm to test IDA criterion, label={algorithm:ida}]
+def testIDA(nfax):
+    nfa = nfax.dup()
+    nfa.trim()
+
+    sz = len(nfa.States)
+
+    conj = myProduct(nfa,nfa)
+    addFinals(conj, nfa, nfa)
+
+    conj2 = myProduct(conj,nfa)
+    addFinals(conj2, conj, nfa)
+
+    for p in xrange(0,sz):
+        for q in xrange(0,sz):
+            if p==q: continue
+            a = (p*sz+p,q)
+            b = (p*sz+q,q)
+            conj2.addTransition(a[0]*sz+a[1],'#',b[0]*sz+b[1])
+    conj2.trim()
+
+    comp = stronglyConnectedComponents(conj2)
+    for l in comp:
+        tcard = False
+        tother = False
+        for i in l:
+            if i not in conj2.delta: continue
+            for symb in conj2.delta[i]:
+                for t in conj2.delta[i][symb]:
+                    if t in l:
+                        if symb=='#': tcard = True
+                        else: tother = True
+                        if tcard and tother: return True
+
+    return False
+\end{lstlisting}
+
+
+\subsection{Criterion for Having Ambiguity}
+An NFA M is ambiguous if and only if in $M \times M$ there is a useful state that is not in the diagonal \cite{Sakarovitch}.
+
+An automaton is FNFA if and only if it is ambiguous and not satisfies the IDA criterion. If it is not ambiguous then it is UFA.
+
+% Finally the following algorithm tests whether an NFA $M$ is ambiguous by checking if it has some useful state that is not in the diagonal of $M^2$.
+For an NFA $M$, the algorithm presented in Algorithm \ref{algorithm:amb}, is as follows. First, in lines 2-6, $M$ is trimmed and $M^2$ is computed. Then for each useful state of $M^2$ we test if it is in the diagonal (lines 10 and 11).
+
+\begin{lstlisting}[language=Python, caption = Algorithm to test Ambiguity, label={algorithm:amb}]
+def testAmbiguity(nfax):
+    nfa = nfax.dup()
+    nfa.trim()
+
+    conj = myProduct(nfa,nfa)
+    addFinals(conj, nfa, nfa)
+
+    useful = conj.usefulStates()
+    for i in useful:
+        (x,y) = literal_eval(conj.States[i])
+        if x != y:
+            return True
+
+    return False
+\end{lstlisting}

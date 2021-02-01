@@ -1,0 +1,99 @@
+% Document Type: LaTeX
+% Master File: thesis.tex
+\documentclass[12pt,a4paper]{report}
+\usepackage{fcthesis}         %estilo da tese (``uptese'' --> portugues)
+% \usepackage[ingles]{babel}
+\usepackage[utf8]{inputenc}
+%\usepackage{epsf}             %incluir figuras encapsulated postscript
+%\usepackage{amstex}
+%\pagestyle{myheadings}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{tikz}
+\usepackage{listings}
+\usepackage{color}
+
+%\usepackage{graphicx}
+%\usepackage{graphics}
+
+\graphicspath{ {./images/} }
+
+\usetikzlibrary{shapes,shapes.geometric,arrows,fit,calc,positioning,automata,decorations.pathmorphing}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+\lstset{style=mystyle}
+
+\usepackage{amsthm}
+\usepackage{subcaption}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+
+\renewcommand\lstlistingname{Algorithm}
+\renewcommand\lstlistlistingname{Algorithms}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\includeonly{abs,decl,pref,acks,ch1,ch2,ch3,ch4,app1}
+
+\begin{document}
+
+\title{Degree of Ambiguity}
+
+\submitionplace{Relatório de Projeto}
+
+\author{Afonso das Neves Fernandes}
+\department{Departamento de Ci\^encia de Computadores \\ Faculdade de
+Ci\^encias da Universidade do Porto}
+
+\submitdate{Junho de 2019}
+
+\supervisor{Nelma Resende Araújo Moreira e Rogério Ventura Lages dos Santos Reis}
+% \cosupervisor{Nome Completo (se aplicável, retirar caso contrário)}
+
+\beforepreface
+% \dedicationpage{(Dedicat\'oria opcional...)}
+% \include{acks}
+% \include{pref}
+% \include{abs}
+\afterpreface
+
+% end of thesis preambule
+\lstlistoflistings
+\include{ch1}
+\include{ch2}
+\include{ch3}
+\include{ch4}
+\appendix
+\include{app1}
+%\renewcommand{\bibname}{References}
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\end{document}

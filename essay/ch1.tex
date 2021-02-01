@@ -1,0 +1,105 @@
+\chapter{Introduction}
+One important subject in computer science is theory of finite automata because automata are a robust model of computation that has widespread applications from compilers to bioinformatics, image recognition and computer networks.
+
+One of such applications is in pattern matching and in particular regular expression pattern matching. For manipulation, expressions are usually converted into non-deterministic finite automata. One of the difficulties is the ambiguity of the automata because there may exist several possible matches and thus several syntactic trees. To prevent these problems, normally, greedy strategies are implemented to select one \cite{BorsottiBCM15}.
+
+In this report, we will study the ambiguity of non-deterministic finite automata. In particular we will use the library of FAdo \cite{BRODA201994} to implement the criteria for ambiguity classification and run experiments to study the distribution of the classes of ambiguity.
+
+We start by defining ambiguity of an automaton and the classes of ambiguity. Then we present the criteria to classify the ambiguity and their implementations.
+
+Finally, we will present the experiments done in order to study the distribution of the classes of ambiguity and discuss the results.
+
+\section{Definitions and Notations}
+In this section we present some definitions used in this report. In particular the definition of an NFA and a DFA, and the definition of a path.
+
+% \begin{definition}
+% An language is a set of words over an alphabet $\Sigma$.
+% \end{definition}
+
+Given a finite set of symbols $\Sigma$, called an alphabet, and a word as a finite sequence of elements of $\Sigma$, we define a language to be a set of words over an alphabet and $\Sigma^*$ to be the language of all words that can be formed using symbols of $\Sigma$.
+
+Throughout this report, we use some simple regular expressions with the following operations: concatenation, $+$ as disjunction and $*$ as the Kleene star.
+
+\begin{definition}
+A non-deterministic finite automaton (NFA) M is defined as a $5$-tuple ($Q$,$\Sigma$,$\delta$,$I$,$F$) where $Q$ is the set of states, $\Sigma$ the set of input symbols, $\delta \subseteq Q \times \Sigma \times Q$ the finite set of transitions and $I$,$F$ are the set of initial and final states, respectively.
+\end{definition}
+
+The size of an NFA is defined as $|Q|+|\delta|$, the number of states plus the number of transitions.
+
+% $\delta$ is the partial transition function defined as $Q \times \Sigma \mapsto 2^Q$
+
+\begin{definition}
+A deterministic finite automaton (DFA) is an NFA where for each state $s$ and symbol $x$ there is at most one pair ($s$,$x$,$s'$) in $\delta$, with $s'$ in $Q$.
+\end{definition}
+
+\begin{definition}
+A path $\pi$ on an NFA is a sequence of states, bigger than one, such that between two consecutive states of $\pi$ there is at least one transition. We denote by $i[\pi]$ and by $f[\pi]$ the origin state and destination state of $\pi$. If $i[\pi] \in I$ and $f[\pi] \in F$ the path $\pi$ is an accepting path. A path $\pi$ is labeled by a set of words, each one resulting from the concatenation of symbols of the transitions between consecutive states of $\pi$ ($l[\pi]$). A path $\pi$ spells a word $w \in \Sigma^*$ if $w \in l[\pi]$.
+A path accepts a word if it is an accepting path and if the path spells the word.
+\end{definition}
+
+% We define a path of an automata because it allows to define ambiguity of an automata in the next chapter.
+
+\begin{figure}[ht]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \begin{tikzpicture}[>=stealth', shorten >=1pt, auto,
+    node distance=2cm,initial text={}]
+    \node [state, initial]                           (A) {$0$};
+    \node [state, accepting] [right of=A]            (B) {$1$};
+    \path[->] (A) edge                          node {$a$} (B)
+                  edge [loop above]             node {$a$} ()
+              (B) edge [loop above]             node {$a,b$} ();
+  \end{tikzpicture}
+  \caption{NFA}
+  \label{fig:nfa}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \begin{tikzpicture}[>=stealth', shorten >=1pt, auto,
+    node distance=2cm,initial text={}]
+    \node [state, initial]                           (A) {$0$};
+    \node [state, accepting] [right of=A]            (B) {$1$};
+    \path[->] (A) edge                          node {$a$} (B)
+                  % edge [loop above]             node {$a$} ()
+              (B) edge [loop above]             node {$a,b$} ();
+  \end{tikzpicture}
+  \caption{DFA}
+  \label{fig:dfa}
+\end{subfigure}
+\caption{Example of an NFA and a DFA}
+\label{fig:automaton_example}
+\end{figure}
+
+In figure \ref{fig:automaton_example} are shown two automata diagrams. The circles represent states and the arrows represent transitions.
+
+In Figure \ref{fig:nfa} we have the following paths:
+\begin{itemize}
+  \item $\pi_1 = 0,0,1$
+  \item $\pi_2 = 0,1,1$
+\end{itemize}
+
+The path $\pi_1$ is an accepting path and is labeled only by the word $aa$. On the other hand, the path $\pi_2$ is not an accepting path and is labeled by $\{aa,ab\}$
+
+\begin{definition}
+The language of an NFA $M$, $L(M)$, is the union of $l[\pi]$ for all accepting paths $\pi$ on $M$.
+\end{definition}
+
+All languages that can be represented by finite automata are called regular languages. If two automata accept the same language they are equivalent.
+
+It is known for each positive integer $m$ exists an NFA with $m$ states such that the smallest equivalent DFA will have $2^m$ states \cite{Leung05}.
+
+For DFA's there is at most one accepting path for each word. This leads to more efficient algorithms for the membership problem, this is to decide if a word belongs to the language defined by the automaton.
+
+Although the decision problems on a DFA are computational more efficient than on an NFA with the same size, NFA's are normally used due to the exponential growth in size in the conversion to the equivalent DFA.
+
+\begin{definition}
+A state of an automaton is useful if it is in some accepting path. If all states of an automaton are useful then the automaton is trim.
+\end{definition}
+
+\begin{definition}
+The product automaton, $M_1 \times M_2$, is an automaton where: the states are of the form $(s_1,s_2)$, where both $s_1$ and $s_2$ are states of $M_1$ and $M_2$, respectively; there is a transition $((s_1,s_2),x,(s_1',s_2'))$ if in $M_1$ there is the transition $(s_1,x,s_1')$ and in $M_2$ there is the transition $(s_2,x,s_2')$; and the state $(s_1,s_2)$ is in the initial set if both $s_1,s_2$ are in the initial set of $M_1$ and $M_2$, respectively.
+\end{definition}
+%define useful state, trim, and product
+
+In this work, the library of FAdo is used to implement the algorithms and make the experiments \cite{BRODA201994}.
+In the library there is a structure for an NFA, where ($Q$,$\Sigma$,$\delta$,$I$,$F$) are respectively represented by the following attributes: States(list), Sigma(set), delta(dict), Initial(set), Final(set).

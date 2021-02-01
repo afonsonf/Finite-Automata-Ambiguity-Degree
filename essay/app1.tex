@@ -1,0 +1,74 @@
+\chapter{Code for Auxiliary Functions}
+
+\begin{lstlisting}[language=Python, caption = Auxiliary functions]
+def addFinals(conj, nfa1, nfa2):
+    """Adds finals states to nfa1 x nfa2"""
+    sz = len(nfa2.States)
+    for x in [(a, b) for a in nfa1.Final for b in nfa2.Final]:
+        if str(x) in conj.States:
+            conj.addFinal(x[0]*sz+x[1])
+
+def myProduct(nfa1, nfa2):
+    """Computes nfa1 x nfa2"""
+    nfa = NFA()
+
+    sz1 = len(nfa1.States)
+    sz2 = len(nfa2.States)
+
+    #state (i,j) is in index i*sz2+j
+    for i in xrange(0,sz1):
+        for j in xrange(0,sz2): nfa.addState(str((i,j)))
+    for i in nfa1.Initial:
+        for j in nfa2.Initial: nfa.addInitial(i*sz2+j)
+
+    for s1 in nfa1.delta:
+        for symb in nfa1.delta[s1]:
+            for s2 in nfa2.delta:
+                if symb not in nfa2.delta[s2]: continue
+                states = [i*sz2+j for i in nfa1.delta[s1][symb] for j in nfa2.delta[s2][symb]]
+                for state in states: nfa.addTransition(s1*sz2+s2,symb,state)
+    return nfa
+
+def stronglyConnectedComponents(nfa):
+    """Computes the strongly connected components of nfa"""
+    def dfs(graph, node, vis, list):
+        stack = [node]
+        while len(stack) > 0:
+            n = stack.pop()
+            if vis[n] == 2: continue
+            if vis[n] == 1:
+                list.append(n)
+                vis[n] = 2
+                continue
+
+            vis[n] = 1
+            stack.append(n)
+            for child in graph[n]:
+                if not vis[child]: stack.append(child)
+
+    sz = len(nfa.States)
+    graph  = [set() for i in xrange(0,sz)]
+    graphT = [set() for i in xrange(0,sz)]
+
+    for i in nfa.delta:
+        for symb in nfa.delta[i]:
+            for j in nfa.delta[i][symb]:
+                graph[i].add(j)
+                graphT[j].add(i)
+
+    stack = []
+    vis = [0 for i in xrange(0,sz)]
+    for node in xrange(sz-1,-1,-1):
+        if not vis[node]: dfs(graph, node, vis, stack)
+
+    strongComp = []
+    vis = [0 for i in xrange(sz-1,-1,-1)]
+    while len(stack) > 0:
+        node = stack.pop()
+        if vis[node]: continue
+        comp = []
+        dfs(graphT, node, vis, comp)
+        strongComp.append(comp)
+
+    return strongComp
+\end{lstlisting}
